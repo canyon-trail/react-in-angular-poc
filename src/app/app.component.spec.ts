@@ -1,31 +1,28 @@
-import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { render, screen } from "@testing-library/angular";
+import userEvent from "@testing-library/user-event";
+import { AppModule } from './app.module';
 
 describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [
-        AppComponent
-      ],
-    }).compileComponents();
+  it('should update react component from angular text entry', async () => {
+    await render(AppComponent, { imports: [AppModule] });
+
+    await userEvent.type(document.querySelector(".ng-input")!, "potatoe");
+
+    const reactValue = document.querySelector(".react-value");
+    expect(reactValue?.textContent).toContain("potatoe");
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
+  it('should update angular component from react text entry', async () => {
+    await render(AppComponent, { imports: [AppModule] });
 
-  it(`should have as title 'ng-react-poc'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('ng-react-poc');
-  });
+    await userEvent.type(document.querySelector(".ng-input")!, "derp");
 
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('ng-react-poc app is running!');
+    const reactInput = screen.getByRole("textbox", { name: /React/ });
+    await userEvent.click(reactInput);
+    await userEvent.paste("potatoe");
+
+    const reactValue = document.querySelector(".ng-value");
+    expect(reactValue?.textContent).toContain("potatoe");
   });
 });
